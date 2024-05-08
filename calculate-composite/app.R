@@ -14,10 +14,6 @@ ui <- fluidPage(
      tags$a(href = "https://www.linkedin.com/in/pradhanhitesh/", "Hitesh Pradhan"),
      id = "bottom_text",
      style = "color: red; text-align: center;"),
-  #h5("Motivation papers: ",
-     #tags$a(href = "https://github.com/pradhanhitesh/Characterisitcs-Table/issues", "[1]"),
-     #tags$a(href = "https://github.com/pradhanhitesh/Characterisitcs-Table", "[2]"),
-     #align = 'center'),
   
   sidebarLayout(
     sidebarPanel(
@@ -26,10 +22,12 @@ ui <- fluidPage(
       downloadButton("downloadData", "Download Data")
     ),
     mainPanel(
+      verbatimTextOutput("error"),
       verbatimTextOutput("loadings")
     )
   )
 )
+
 
 # Define server logic
 server <- function(input, output) {
@@ -52,6 +50,10 @@ server <- function(input, output) {
     req(input$columns)
     sub_data <- data() %>%
       select(input$columns)
+    # Check for missing values
+    if (any(is.na(sub_data))) {
+      return("Error: Missing values detected in selected columns.")
+    }
     scaled_data <- scale(sub_data)
     pca <- prcomp(scaled_data, center = FALSE, scale. = FALSE)
     loadings <- pca$rotation[, 1]
